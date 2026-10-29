@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "ticklog",
+  "version": "${version}",
+  "name": "Ticklog",
+  "description": "Tracks your Minecraft playtime. See it on ticklog.net.",
+  "authors": ["offup"],
+  "contact": {
+    "homepage": "https://ticklog.net",
+    "issues": "https://ticklog.net"
+  },
+  "license": "MIT",
+  "icon": "assets/ticklog/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["net.ticklog.TicklogClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.0",
+    "minecraft": "${mc_range}",
+    "java": ">=${java}",
+    "fabric-api": "*"
+  }
+}

@@ -1,0 +1,46 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version '1.19.3'
+}
+
+// One source tree, one jar per Minecraft version: ./gradlew build -Pmc=26.1 (files in versions/).
+def mc = project.hasProperty('mc') ? project.mc : '26.3'
+def vp = new Properties()
+file("versions/${mc}.properties").withInputStream { vp.load(it) }
+def javaVersion = vp.java.toInteger()
+
+version = "${project.mod_version}+${mc}"
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+// 26.x ships unobfuscated with Mojang names, so no mappings or remapping.
+dependencies {
+    minecraft "com.mojang:minecraft:${vp.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${vp.fabric_version}"
+}
+
+processResources {
+    def props = [version: project.mod_version, mc_range: vp.mc_range, java: javaVersion]
+    inputs.properties props
+    filesMatching("fabric.mod.json") {
+        expand props
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = javaVersion
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(javaVersion)
+    targetCompatibility = JavaVersion.toVersion(javaVersion)
+}
+
+jar {
+    def projectName = project.name
+    inputs.property "projectName", projectName
+    from("LICENSE") { rename { "${it}_$projectName" } }
+}
