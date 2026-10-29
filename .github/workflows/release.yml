@@ -1,0 +1,51 @@
+# Builds one jar per Minecraft version and attaches them to the GitHub release
+# v<mod_version>. Runs when main is pushed; skips if that release already exists.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version
+        id: v
+        run: |
+          echo "version=$(grep '^mod_version=' gradle.properties | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Check release
+        id: exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "v${{ steps.v.outputs.version }}" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-java@v4
+        if: steps.exists.outputs.skip != 'true'
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Build
+        if: steps.exists.outputs.skip != 'true'
+        run: ./build-all.sh
+
+      - name: Release
+        if: steps.exists.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="${{ steps.v.outputs.version }}"
+          gh release create "v$v" --target "$GITHUB_SHA" --title "$v" \
+            --notes "Minecraft 26.1 to 26.3. Pick the jar for your version. Needs Fabric API." \
+            $(ls build/libs/*.jar | grep -v sources)
