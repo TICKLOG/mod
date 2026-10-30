@@ -64,6 +64,9 @@ final class Stats {
             if (world.isClientSide() && counts() && player.getItemInHand(hand).getItem() instanceof BlockItem item) {
                 BlockPos at = hit.getBlockPos();
                 BlockPos next = at.relative(hit.getDirection());
+                // A retry on the same spot (the server undid the first try) replaces it,
+                // so the one block that stays isn't counted twice.
+                pending.removeIf(p -> p.placed() != null && p.pos().equals(at) && p.other().equals(next));
                 pending.add(new Pending(tick + CONFIRM_TICKS, at, world.getBlockState(at), item.getBlock(), next, world.getBlockState(next)));
             }
             return InteractionResult.PASS;
@@ -129,7 +132,10 @@ final class Stats {
 
     /** Called before the client removes a block it's breaking. */
     void breaking(BlockPos pos, BlockState state) {
-        if (counts() && !state.isAir()) pending.add(new Pending(tick + CONFIRM_TICKS, pos, state, null, null, null));
+        if (!counts() || state.isAir()) return;
+        // Same for a block broken again after the server put it back.
+        pending.removeIf(p -> p.placed() == null && p.pos().equals(pos));
+        pending.add(new Pending(tick + CONFIRM_TICKS, pos, state, null, null, null));
     }
 
     void jumped() {
