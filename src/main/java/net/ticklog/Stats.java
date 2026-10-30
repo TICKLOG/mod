@@ -113,7 +113,9 @@ final class Stats {
             if (p.dueTick() > tick) break;
             it.remove();
             if (p.placed() == null) {
-                if (!mc.level.getBlockState(p.pos()).equals(p.before())) broken++;
+                // Only the block type: a block the server put back can come back
+                // with other properties (e.g. through a version translator).
+                if (!mc.level.getBlockState(p.pos()).is(p.before().getBlock())) broken++;
             } else if (isNew(mc, p.pos(), p.before(), p.placed()) || isNew(mc, p.other(), p.otherBefore(), p.placed())) {
                 placed++;
             }
