@@ -1,15 +1,28 @@
-# Ticklog
+# TickLog
 
-Client-side Fabric mod that tracks your Minecraft stats per account and shows them on [ticklog.net](https://ticklog.net).
+Client-side Fabric mod that tracks your Minecraft stats and shows them on [ticklog.net](https://ticklog.net).
 
-## How it works
+## Tracked Stats
 
-- On game start the mod proves account ownership through Mojang's session server (the same handshake as joining a server) and gets a token for this account.
-- Every 30 seconds it tells ticklog.net where you are: launcher, singleplayer or a server address. The website adds up the time between those pings.
-- With each ping it sends what you did since the last one: blocks traveled (walked and flown), broken and placed, mob and player kills, deaths and jumps. Only Survival and Adventure count.
-- To see your stats and change settings, log in on ticklog.net with the Microsoft account you play with.
+- Playtime in singleplayer, on servers and in the main menu
+- Blocks traveled, walking and flying with an elytra
+- Blocks broken and placed
+- Mob and player kills
+- Deaths
+- Jumps
 
-Nothing is stored on your PC. The mod sends your UUID, name, playtime, stats and the server address, nothing else.
+Stats only count in Survival and Adventure mode. Playtime counts in every mode.
+
+## How It Works
+
+- On game start, the mod verifies your account through Mojang's session server, the same check Minecraft uses when you join a server.
+- Every 30 seconds, it reports where you are playing and your stats since the last report.
+- Block changes, kills and deaths only count once the server has confirmed them.
+- To manage your profile, log in on ticklog.net with Discord and link your Minecraft account.
+
+## Privacy
+
+The mod sends your UUID, name, the address of the server you are playing on, your playtime and your stats. It doesn't store anything on your computer. Details are in the [Privacy Policy](https://ticklog.net/privacy-policy).
 
 ## Building
 
