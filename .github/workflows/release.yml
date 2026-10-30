@@ -73,7 +73,7 @@ jobs:
             data=$(jq -n --arg name "$v for $mc" --arg number "$number" --arg project "$project" --argjson games "$games" '{
               name: $name, version_number: $number, project_id: $project, game_versions: $games,
               loaders: ["fabric"], version_type: "release", featured: true, status: "listed",
-              changelog: "Stats tracking: blocks traveled, broken and placed, kills, deaths and jumps.",
+              changelog: "See the GitHub release for changes.",
               dependencies: [{project_id: "P7dR8mSH", dependency_type: "required"}],
               file_parts: ["file"], primary_file: "file"}')
             curl -sf "${auth[@]}" -F "data=$data" -F "file=@$jar" "$api/version" > /dev/null

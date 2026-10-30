@@ -16,9 +16,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Sends a heartbeat to ticklog.net every 30 seconds while the game runs, tagged with
- * where the player is: launcher (menus), singleplayer, or a server (with address), and
- * with the stats counted since the last one. The server credits time from the gaps
- * between heartbeats, nothing is stored locally.
+ * where the player is: launcher (menus), singleplayer, or a server (with address).
+ * The server credits time from the gaps between heartbeats, nothing is stored locally.
  */
 final class Tracker {
     private static final Logger LOGGER = LoggerFactory.getLogger("ticklog");
@@ -47,7 +46,6 @@ final class Tracker {
     }
 
     private void tick(Minecraft client) {
-        Stats.INSTANCE.tick(client);
         long now = System.currentTimeMillis();
         State state = stateOf(client);
 
@@ -91,8 +89,6 @@ final class Tracker {
         JsonObject body = new JsonObject();
         body.addProperty("kind", state.kind());
         body.addProperty("server", state.server());
-        JsonObject stats = Stats.INSTANCE.take();
-        body.add("stats", stats);
         CompletableFuture.runAsync(() -> {
             try {
                 HttpRequest request = HttpRequest.newBuilder(URI.create(Api.BASE + "/heartbeat"))
@@ -110,7 +106,6 @@ final class Tracker {
                 }
             } catch (Exception e) {
                 LOGGER.warn("ticklog: heartbeat failed: {}", e.getMessage());
-                Minecraft.getInstance().execute(() -> Stats.INSTANCE.restore(stats));
             }
         }, Api.EXEC);
     }
