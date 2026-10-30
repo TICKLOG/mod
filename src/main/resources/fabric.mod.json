@@ -3,7 +3,7 @@
   "id": "ticklog",
   "version": "${version}",
   "name": "Ticklog",
-  "description": "Tracks your Minecraft playtime and stats. See them on ticklog.net.",
+  "description": "Tracks your Minecraft stats. See them on ticklog.net.",
   "authors": ["offup"],
   "contact": {
     "homepage": "https://ticklog.net",
