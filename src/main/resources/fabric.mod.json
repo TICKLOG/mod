@@ -3,7 +3,7 @@
   "id": "ticklog",
   "version": "${version}",
   "name": "Ticklog",
-  "description": "Tracks your Minecraft playtime. See it on ticklog.net.",
+  "description": "Tracks your Minecraft playtime and stats. See them on ticklog.net.",
   "authors": ["offup"],
   "contact": {
     "homepage": "https://ticklog.net",
@@ -15,6 +15,7 @@
   "entrypoints": {
     "client": ["net.ticklog.TicklogClient"]
   },
+  "mixins": ["ticklog.mixins.json"],
   "depends": {
     "fabricloader": ">=0.19.0",
     "minecraft": "${mc_range}",
