@@ -16,6 +16,10 @@ public final class StatsHooks {
         Stats.INSTANCE.died(entity);
     }
 
+    public static void attacked(Entity target) {
+        Stats.INSTANCE.attacked(target);
+    }
+
     public static void jumped() {
         Stats.INSTANCE.jumped();
     }

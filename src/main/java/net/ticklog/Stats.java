@@ -29,6 +29,8 @@ final class Stats {
 
     /** Ticks to wait for the server to confirm or undo a block change (about 2 seconds). */
     private static final int CONFIRM_TICKS = 40;
+    /** How long a hit by the player counts towards a kill (5 seconds, like vanilla). */
+    private static final int KILL_TICKS = 100;
     /** Moves longer than this in one tick are teleports or corrections, not travel. */
     private static final double MAX_STEP = 10;
 
@@ -45,10 +47,10 @@ final class Stats {
     private boolean wasDead;
     private long tick;
 
-    /** Whether the last damage the server reported for an entity id came from the player. */
-    private final Map<Integer, Boolean> lastHit = new LinkedHashMap<>(64, 0.75f, false) {
+    /** Tick of the player's last hit per entity id, until someone else hits it. */
+    private final Map<Integer, Long> lastHit = new LinkedHashMap<>(64, 0.75f, false) {
         @Override
-        protected boolean removeEldestEntry(Map.Entry<Integer, Boolean> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<Integer, Long> eldest) {
             return size() > 512;
         }
     };
@@ -142,18 +144,25 @@ final class Stats {
         if (counts()) jumps++;
     }
 
-    /** The server reported damage to an entity, and who caused it. */
-    void damaged(int entityId, int causeId) {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null) lastHit.put(entityId, causeId == player.getId());
+    /** The player attacked an entity. Older servers don't say who caused damage, so this counts too. */
+    void attacked(Entity target) {
+        lastHit.put(target.getId(), tick);
     }
 
-    /** The server reported an entity's death: a kill if the player hit it last. */
+    /** The server reported damage to an entity, and who caused it (negative if no one). */
+    void damaged(int entityId, int causeId) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null || causeId < 0) return;
+        if (causeId == player.getId()) lastHit.put(entityId, tick);
+        else lastHit.remove(entityId);
+    }
+
+    /** The server reported an entity's death: a kill if the player hit it last, shortly before. */
     void died(Entity entity) {
         Minecraft mc = Minecraft.getInstance();
         if (entity == null || mc.player == null || entity == mc.player) return;
-        Boolean mine = lastHit.remove(entity.getId());
-        if (mine == null || !mine || !counts()) return;
+        Long hit = lastHit.remove(entity.getId());
+        if (hit == null || tick - hit > KILL_TICKS || !counts()) return;
         if (entity instanceof Player victim) {
             // Real players are in the tab list; server NPCs usually aren't.
             if (mc.getConnection() != null && mc.getConnection().getPlayerInfo(victim.getUUID()) != null) playerKills++;
